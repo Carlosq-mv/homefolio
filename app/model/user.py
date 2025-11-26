@@ -9,6 +9,7 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(16), nullable=False)
     username: Mapped[str] = mapped_column(String(16), nullable=False)
     email: Mapped[str] = mapped_column(String(32), unique=True, nullable=False)
+    password: Mapped[str] = mapped_column(String(256), nullable=False)
 
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, name={self.name!r}, username={self.username!r}, email={self.email!r})"
