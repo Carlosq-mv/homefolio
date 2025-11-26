@@ -1,19 +1,22 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
-from app.schema.user_schema import UserSchema, UserUpdateSchema
+from app.schema.user_schema import UserSchema, UserUpdateSchema, UserCreateSchema
 from app.model.user import User
+from app.core.utils.auth import Auth
 
 class UserCRUD:
     def __init__(self, db: Session):
+        self.auth = Auth()
         self.db = db
     
-    def create_user(self, user: UserSchema) -> User:
+    def create_user(self, user: UserCreateSchema) -> User:
         try:
             new_user: User = User(
                 username=user.username,
                 name=user.name,
-                email=user.email  
+                email=user.email,
+                password=self.auth.hash_password(user.password)
             )
 
             self.db.add(new_user)
