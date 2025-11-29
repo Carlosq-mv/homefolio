@@ -2,7 +2,6 @@ from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
-from app.model.token import RefreshToken
 
 class User(Base):
     __tablename__ = "users"
@@ -12,7 +11,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(32), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(256), nullable=False)
 
-    refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
+    refresh_tokens: Mapped[list["RefreshToken"]] = relationship( # type: ignore
         back_populates="user",
         cascade="all, delete-orphan"
     )

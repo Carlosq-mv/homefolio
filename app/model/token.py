@@ -4,7 +4,6 @@ from datetime import datetime, timezone
 from sqlalchemy.sql import func
 
 from app.db.base import Base
-from app.model.user import User
 
 class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
@@ -36,4 +35,4 @@ class RefreshToken(Base):
         nullable=False,
     )
 
-    user: Mapped["User"] = relationship(back_populates="refresh_tokens")
+    user: Mapped["User"] = relationship(back_populates="refresh_tokens") # type: ignore
