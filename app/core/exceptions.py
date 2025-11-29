@@ -1,5 +1,8 @@
 from fastapi import HTTPException, status
 
+"""
+Custom Users Exceptions
+"""
 class UserError(Exception):
     status_code = status.HTTP_400_BAD_REQUEST
     message = "User error"
@@ -23,3 +26,34 @@ class UserDoesNotExist(UserError):
 class NoUsersExists(UserError):
     status_code = status.HTTP_404_NOT_FOUND
     message = "No users found"
+
+class UserInvalidCredentials(UserError):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    message = "Invalid email or password"
+
+"""
+Custom JWT Exceptions
+"""
+class JwtError(Exception):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    message = "JWT error"
+
+class JwtRefreshTokenNotFound(JwtError):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    message = "Refresh token is missing"
+
+class JwtRefreshTokenExpired(JwtError):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    message = "Refresh token has expired"
+
+class JwtRefreshTokenInvalid(JwtError):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    message = "Invalid refresh token"
+    
+class JwtRefreshTokenRevoked(JwtError):
+    status_code = status.HTTP_403_FORBIDDEN
+    message = "Refresh token has been revoked"
+
+class JwtRefreshTokenCompromised(JwtError):
+    status_code = status.HTTP_403_FORBIDDEN
+    message = "Refresh token has been compromised"
