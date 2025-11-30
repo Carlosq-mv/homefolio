@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status 
+from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from app.schema.user_schema import UserSchema, UserLoginSchema, UserCreateSchema
@@ -32,13 +33,29 @@ async def create_user(
         )
 
 
-@router.post("/login", response_model=dict[str, str], status_code=status.HTTP_202_ACCEPTED)
+@router.post("/login", status_code=status.HTTP_202_ACCEPTED)
 async def login(
     login_data: UserLoginSchema,
     service: UserService = Depends(get_user_services)
 ) -> dict[str,str]:
     try:
-        return service.login(login_data)
+        res = service.login(login_data)
+
+        response = JSONResponse({
+            "access" : res["access"],
+            "refresh" : res["refresh"] 
+        })
+
+        response.set_cookie(
+            key="rt",
+            value=res["refresh"],
+            httponly=True, 
+            samesite="strict",   
+            max_age=60*60*24*30  # 30 days
+        )
+
+        return response
+
     except AttributeError as e:
         logger.warning("Attribute Error: ", exc_info=(type(e), e, e.__traceback__.tb_next))
         raise HTTPException(
