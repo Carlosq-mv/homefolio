@@ -1,7 +1,7 @@
 import secrets, hashlib
 import jwt
 
-from app.schema.token_schema import AccessTokenCreate, AccessTokenClaims
+from app.schema.token_schema import AccessTokenClaims
 from app.core.config import get_env
 from app.core.exceptions import JwtInvalidAccessToken, JwtAccessTokenExpired
 
@@ -22,18 +22,17 @@ class JWT:
             return encoded_jwt
         except AttributeError as e:
             raise e
-    
 
-    def decode_access_token(self, token: str):
-        print(token)
+    def decode_access_token(self, token: str) -> dict[str, str]:
         try:
+            # get the payload from access token
             payload = jwt.decode(
                 token,
                 get_env().JWT_SECRET_KEY,
                 algorithms=[get_env().JWT_ALGORITHM],
             )
 
-            # Basic claim checks
+            # basic claim checks
             if "sub" not in payload:
                 raise JwtInvalidAccessToken()
 
@@ -41,6 +40,5 @@ class JWT:
                 raise JwtInvalidAccessToken()
 
             return payload
-
         except jwt.ExpiredSignatureError:
             raise JwtAccessTokenExpired()
