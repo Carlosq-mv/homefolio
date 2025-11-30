@@ -6,9 +6,9 @@ from app.db.base import Base
 class User(Base):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(16), nullable=False)
-    username: Mapped[str] = mapped_column(String(16), nullable=False)
-    email: Mapped[str] = mapped_column(String(32), unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(64), nullable=False)
+    username: Mapped[str] = mapped_column(String(64), nullable=False)
+    email: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(256), nullable=False)
 
     refresh_tokens: Mapped[list["RefreshToken"]] = relationship( # type: ignore
