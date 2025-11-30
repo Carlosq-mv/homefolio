@@ -57,3 +57,11 @@ class JwtRefreshTokenRevoked(JwtError):
 class JwtRefreshTokenCompromised(JwtError):
     status_code = status.HTTP_403_FORBIDDEN
     message = "Refresh token has been compromised"
+
+class JwtInvalidAccessToken(JwtError):
+    status_code = status.HTTP_403_FORBIDDEN
+    message = "Invalid access token"
+
+class JwtAccessTokenExpired(JwtError):
+    status_code = status.HTTP_403_FORBIDDEN
+    message = "Access token has expired"
