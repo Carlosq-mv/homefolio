@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.crud.user_crud import UserCRUD
-from app.schema.user_schema import UserSchema, UserUpdateSchema, UserLoginSchema
+from app.schema.user_schema import UserSchema, UserUpdateSchema, UserLoginSchema, UserCreateSchema
 from app.model.user import User
 from app.core.exceptions import UserEmailExists, UserUsernameExists, UserDoesNotExist, NoUsersExists, UserUsernameAndEmailExists, UserInvalidCredentials
 from app.core.utils.auth import Auth
@@ -53,7 +53,7 @@ class UserService:
         if existing_email:
             raise UserEmailExists()
         
-        return self.crud.create_user(user=user)
+        return self.crud.create_user(user=UserCreateSchema(**user.model_dump()))
         
     
     def get_user(self, user_id: int) -> User:
