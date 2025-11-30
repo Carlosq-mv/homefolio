@@ -2,7 +2,8 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, timezone
 
 from app.crud.token_crud import TokenCRUD
-from app.core.utils.jwt import JWT
+from app.model.token import RefreshToken
+from app.core.utils.auth_jwt import JWT
 from app.core.utils.auth import Auth
 from app.core.config import get_env
 from app.schema.token_schema import RefreshTokenCreate, AccessTokenCreate, AccessTokenClaims
@@ -35,7 +36,7 @@ class JWTService:
     
     def refresh_token_rotation(self, raw_token: str) -> tuple[str, str]:
         token_hash: str = self.jwt.hash_refresh_token(token=raw_token)
-        stored_token: str= self.crud.get_refresh_token(token_hash=token_hash)
+        stored_token: RefreshToken | None = self.crud.get_refresh_token(token_hash=token_hash)
 
         # check if the token has been stored
         if not stored_token:
@@ -43,7 +44,7 @@ class JWTService:
 
         if stored_token.is_revoked:
             # TODO: revoke all tokens for this user upon compromise detection
-            self.crud.revoke_refresh_token(user_id=stored_token.id) 
+            self.crud.revoke_refresh_token(token_id=stored_token.id) 
             raise JwtRefreshTokenCompromised() 
 
         # check if the token has already been expired 
@@ -56,7 +57,7 @@ class JWTService:
         new_token: str = self.jwt.create_refresh_token()
 
         # revoke the old token
-        self.crud.revoke_refresh_token(id=stored_token.id)
+        self.crud.revoke_refresh_token(token_id=stored_token.id)
 
         # hash and store the new token
         new_token_hash: str = self.jwt.hash_refresh_token(token=new_token)
@@ -76,7 +77,7 @@ class JWTService:
     def create_access_token(self, user_id: int):
         access_token: str = self.jwt.create_access_token(
             AccessTokenClaims(
-                sub=user_id,
+                sub=str(user_id),
                 exp=datetime.now(timezone.utc) + timedelta(minutes=get_env().ACCESS_TOKEN_EXPIRE_MINUTES),
                 iat=datetime.now(timezone.utc)     
             )
