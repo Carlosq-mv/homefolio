@@ -14,11 +14,11 @@ class RefreshTokenCreate(BaseModel):
     expires_at: datetime
 
 class AccessTokenClaims(BaseModel):
-    sub: int | None = None
+    sub: str | None = None
     exp: datetime | None = None
     iat: datetime | None = None
     iss: str = get_env().ISS
 
 class AccessTokenCreate(BaseModel):
-    user_id: int
+    user_id: str
     refresh_token: str
