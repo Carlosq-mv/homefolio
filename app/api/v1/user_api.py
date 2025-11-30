@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status 
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from pydantic import BaseModel
 
 from app.schema.user_schema import UserSchema, UserLoginSchema, UserCreateSchema
 from app.service.user_service import UserService
-from app.api.deps import get_user_services
+from app.api.deps import get_user_services, get_current_user
 import logging
 
 logger = logging.getLogger(__name__)
@@ -18,15 +19,16 @@ async def create_user(
 ) -> UserSchema:
     try:
         logger.info(f"Creating a new user.")
-        return service.create_user(user)
+
+        return service.create_user(user=UserSchema(**user.model_dump()))
     except IntegrityError as e:
-        logger.error(f"Integrity error occurred: ", exc_info=(type(e), e, e.__traceback__.tb_next))
+        logger.error(f"Integrity error occurred: ", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, 
             detail="Database integrity error"
         )
     except SQLAlchemyError as e:
-        logger.error(f"SQL error: ", exc_info=(type(e), e, e.__traceback__.tb_next))
+        logger.error(f"SQL error: ", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
             detail="A database error occurred."
@@ -37,8 +39,9 @@ async def create_user(
 async def login(
     login_data: UserLoginSchema,
     service: UserService = Depends(get_user_services)
-) -> dict[str,str]:
+) -> JSONResponse:
     try:
+        logger.info(f"Logging in user (email={login_data.email}).")
         res = service.login(login_data)
 
         response = JSONResponse({
@@ -57,8 +60,12 @@ async def login(
         return response
 
     except AttributeError as e:
-        logger.warning("Attribute Error: ", exc_info=(type(e), e, e.__traceback__.tb_next))
+        logger.warning("Attribute Error: ", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error occurred."
         )
+
+@router.get("/current-user")
+def current_user(user: UserSchema = Depends(get_current_user)):
+    return user
